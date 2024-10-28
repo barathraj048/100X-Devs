@@ -1,4 +1,4 @@
-const return_first_ele=<T>(array : T[])=> { //T indicate anu type it can be
+const return_first_ele=<T>(array : T[]):T => { //T indicate anu type it can be
    return array[0]
 }
 
