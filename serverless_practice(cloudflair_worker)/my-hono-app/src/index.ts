@@ -1,13 +1,23 @@
-import { Hono } from 'hono'
+import { Hono } from 'hono';
 
-const app = new Hono()
+const app = new Hono();
 
-app.get('/', async (c) => {
-  const body = await c.req.json()
-  console.log(body);
-  console.log(c.req.query('prams'))
-  console.log(c.req.header('Authenticator'))
-  return c.text('Hello Hono!')
-})
+// Middleware to check authentication token
+const AuthMiddleware = async (c:any, next:any) => {
+  const token = c.req.header('Authenticator');
+  
+  if (token === 'approve') {
+    await next();
+  } else {
+    return c.json({ message: 'Failed to authenticate you' }, 401);
+  }
+};
 
-export default app
+app.get('/', AuthMiddleware, async (c) => {
+  console.log('Query Param:', c.req.query('prams')); 
+  console.log('Authenticator Header:', c.req.header('Authenticator'));
+  
+  return c.text('Hello Hono!');
+});
+
+export default app;
