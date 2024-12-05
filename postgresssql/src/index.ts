@@ -11,7 +11,7 @@ const app=express()
 // for localhost
 
 const client = new Client({
-   user: 'PostgreSQL',         // PostgreSQL username
+   user: 'Postgresql',         // PostgreSQL username
    host: 'localhost',             // Hostname (usually 'localhost' if running locally)
    database: '100x-Pract',     // Database name
    password: '123456',     // PostgreSQL password
