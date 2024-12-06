@@ -11,11 +11,11 @@ const app=express()
 // for localhost
 
 const client = new Client({
-   user: 'Postgresql',         // PostgreSQL username
-   host: 'localhost',             // Hostname (usually 'localhost' if running locally)
-   database: '100x-Pract',     // Database name
-   password: '123456',     // PostgreSQL password
-   port: 5432,
+   user: 'postgres',
+  password: '123456',
+  host: 'localhost',
+  port: 5432,
+  database: 'postgres',
 });
 
 
@@ -31,6 +31,15 @@ const create_tbl = async () => {
             Time_created TIMESTAMP WITH TIME ZONE DEFAULT NOW()
          );
       `);
+      await client.query(`
+            CREATE TABLE IF NOT EXISTS Address (
+            Id SERIAL PRIMARY KEY,
+            UserId INT NOT NULL,
+            city VARCHAR(80) UNIQUE NOT NULL,
+            town VARCHAR(80),
+            Time_created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE);
+         `)
       console.log("Table created successfully");
    } catch (error) {
       console.error("Error creating table:", error);
@@ -39,9 +48,59 @@ const create_tbl = async () => {
    }
 };
 
-create_tbl();
+// this method of insertion is not recomended due to its lead ti sql injuction
+      const insert_data=async ()=> {
+      try{
+         await client.connect()
+         await client.query(`INSERT INTO Users (Username, Email, Password) 
+      VALUES ('barathraj', 'kuyt@gmail.com', 'kvgjhf58777');
+            `)
+            console.log(`sucesfully inseryed data`)
+      }catch(err){
+         console.log(`error on insertion:${err}`)
+      }finally{
+         client.end()
+      }
+      }
 
+//always use this to avoid sqlinjection
+const Safe_insert_data=async ()=> {
+   try{
+     await client.connect()
+     await client.query(`
+      INSERT INTO Users (Username, Email, Password) 
+      VALUES ($1,$2,$3)`,['barathraj677', 'kuyt@gmkgail.com', 'kvgjhf58777']
+   )
+        console.log(`sucesfully inseryed data`)
+   }catch(err){
+     console.log(`error on insertion:${err}`)
+   }finally{
+     client.end()
+   }
+  }
+//   Safe_insert_data();
 
+//   create_tbl()
+  const Safe_Trantition_data=async ()=> {
+   try{
+     await client.connect()
+     client.query('BEGIN')
+     await client.query(`
+      INSERT INTO Users (UserId, city) 
+      VALUES ($1,$2,$3)`,['1', 'pollachi']
+   )
+   await client.query( `
+      INSERT INTO Address()
+      `)
+   client.query('COMMIT')
+        console.log(`sucesfully transferd data`)
+   }catch(err){
+     console.log(`error on transfer:${err}`)
+   }finally{
+     client.end()
+   }
+  }
+  Safe_Trantition_data()
 app.listen(3000,()=> {
    console.log(`server is running on port 3000`)
 })
