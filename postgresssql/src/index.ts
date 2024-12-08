@@ -80,7 +80,7 @@ const Safe_insert_data=async ()=> {
   }
 //   Safe_insert_data();
 
-//   create_tbl()
+  create_tbl()
   const Safe_Trantition_data=async ()=> {
    try{
      await client.connect()
@@ -100,7 +100,27 @@ const Safe_insert_data=async ()=> {
      client.end()
    }
   }
-  Safe_Trantition_data()
+//   Safe_Trantition_data()
+
+//joins
+
+const ReturnJoinedQuery=async ()=> {
+   try{
+      await client.connect()
+      const joinData=await client.query(`
+         SELECT User.id, User.Name ,Address.city ,Address.Pincode
+         FROM User
+         JOIN Address ON User.id=Address.User_id
+         WHERE User.id='5'
+         `)
+      console.log('join table saved sucesfully')
+   }catch(err){
+      console.log(`error at fetching join:${err}`)
+   }finally{
+      client.end()
+   }
+}
+
 app.listen(3000,()=> {
    console.log(`server is running on port 3000`)
 })
