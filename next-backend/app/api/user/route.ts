@@ -1,4 +1,7 @@
+import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+
+const client=new PrismaClient()
 
 export  function GET() {
    return (
@@ -10,14 +13,25 @@ export  function GET() {
 }
 
 export async function POST(req:NextRequest){
-   const body= await req.body
+   try{
+      const body= await req.json()
    console.log(body)
-   const head=req.headers.get('auth')
-   console.log(head)
-   const prams=req.nextUrl.searchParams.get('name')
-   console.log(prams)
+   await client.user.create({
+      data: {
+         username:body.username,
+         passwors:body.passwors
+      }
+   })
    return (NextResponse.json({
-      message: "you logged in"
+      body
     }))
+   }catch(err){
+      console.log(err)
+      NextResponse.json({
+         Error:'error handiled',
+      },{
+         status:402
+      })
+   }
     
 }
