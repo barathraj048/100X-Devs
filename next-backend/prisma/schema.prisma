@@ -16,5 +16,5 @@ datasource db {
 model User {
   id    Int     @id @default(autoincrement())
   username String  @unique
-  passwors  String?
+  passwors  String
   }

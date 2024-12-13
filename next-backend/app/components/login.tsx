@@ -1,6 +1,7 @@
 'use client'
 import { useState } from "react"
 import axios from "axios"
+import { Signin } from "../actions/user"
 
 export const Login=()=> {
    const [username,setUsernme]=useState('')
@@ -11,10 +12,12 @@ export const Login=()=> {
             <input type="username" placeholder="username" onChange={(e)=> {setUsernme(e.target.value)}} value={username}/>
             <input type="password" placeholder="Password" onChange={(e)=> {setPassword(e.target.value)}} value={password}/>
             <button onClick={()=> {
-               axios.post('http://localhost:3000/api/user',{
-                  username,
-                  password
-               })
+               // axios.post('http://localhost:3000/api/user',{
+               //    username,
+               //    password
+               // })
+               //using server action
+               Signin(username,password)
             }}>Signup</button>
          </div>
       </div>

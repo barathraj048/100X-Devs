@@ -1,32 +1,31 @@
-import { PrismaClient } from "@prisma/client";
+import client from '@/db'
 import { NextRequest, NextResponse } from "next/server";
 
-const client=new PrismaClient()
 
-export  function GET() {
+export const GET= async ()=> {
+   const user=await client.user.findFirst()
    return (
       NextResponse.json({
-         name:"barath",
-         email:"barath@gmail.com"
+         name:user?.username,
+         email:user?.passwors 
       })
    )
 }
 
-export async function POST(req:NextRequest){
+export const POST= async(req:NextRequest)=> {
    try{
       const body= await req.json()
    console.log(body)
    await client.user.create({
       data: {
          username:body.username,
-         passwors:body.passwors
+         passwors:body.password
       }
    })
    return (NextResponse.json({
       body
     }))
    }catch(err){
-      console.log(err)
       NextResponse.json({
          Error:'error handiled',
       },{

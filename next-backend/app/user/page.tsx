@@ -1,16 +1,11 @@
-import axios from "axios";
-import { Suspense } from "react";
-import Loading from "./loading";
+import client from '@/db'
 
 export const BackendFetch = async () => {
   try {
-    const response = await axios.get(
-      "http://localhost:3000/api/user"
-    );
-    return response.data; 
+     const user=await client.user.findFirst()
+       return ( user)
   } catch (err) {
     console.error(err);
-
   }
 };
 
@@ -19,8 +14,8 @@ export default async function User() {
 
   return (
     <div>
-      <p>Name: {response.name}</p>
-      <p>Email: {response.email}</p>
+      <p>Name: {response?.username}</p>
+      <p>Email: {response?.passwors}</p>
     </div>
   );
 }
