@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -1,0 +1,1 @@
+export const congif_uri:string='jkenvlkjnvfklnvkjdfdjhbdjbdfy'

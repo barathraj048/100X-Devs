@@ -1,0 +1,18 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js && node dist/index.js",
+    "build" :"esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@repo/ui": "*",
+    "@types/express": "^5.0.0",
+    "express": "^4.21.2"
+  }
+}
