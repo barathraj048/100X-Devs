@@ -3,12 +3,7 @@ import  express  from "express";
 
 const app=express()
 
-// const client= new Client({
-//    connectionString:'postgresql://test_owner:MI5F4dxsnGVi@ep-gentle-fog-a1muynp0.ap-southeast-1.aws.neon.tech/test?sslmode=require'
-//    connectionString:'postgresql://username:password@127.0.0.1:5432/100x-Pract'   (localhost URI)
-// })
 
-// for localhost
 
 const client = new Client({
    user: 'postgres',
