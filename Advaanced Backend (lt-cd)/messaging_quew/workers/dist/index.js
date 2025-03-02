@@ -27,6 +27,7 @@ const processSubmissions = () => __awaiter(void 0, void 0, void 0, function* () 
             const response = yield client.rPop("submition");
             if (response) {
                 console.log("submition response:", response);
+                submition(response);
             }
             yield new Promise((res) => setTimeout(res, 2000));
         }
@@ -36,3 +37,15 @@ const processSubmissions = () => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 processSubmissions();
+//submition to pub-sub
+let submition = (resp) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        new Promise((res) => setTimeout(res, 2000));
+        const { problem, userid, language, sol } = JSON.parse(resp);
+        yield client.publish("problem_done", JSON.stringify({ problem, Ststus: "done" }));
+        console.log('Submition done');
+    }
+    catch (err) {
+        console.log("Error while submition", err);
+    }
+});

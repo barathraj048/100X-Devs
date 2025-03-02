@@ -19,6 +19,7 @@ const processSubmissions = async () => {
          const response: any = await client.rPop("submition");
          if (response) {
             console.log("submition response:", response);
+            submition(response);
          }
          await new Promise((res) => setTimeout(res, 2000)); 
       }
@@ -28,3 +29,18 @@ const processSubmissions = async () => {
 };
 
 processSubmissions();
+
+
+//submition to pub-sub
+let submition=async(resp:any)=> {
+   try{
+      new Promise((res) => setTimeout(res, 2000));
+      const { problem, userid, language, sol } = JSON.parse(resp);
+      await client.publish("problem_done",JSON.stringify({problem,Ststus:"done"}));
+      console.log('Submition done');
+   }catch(err){   
+      console.log("Error while submition",err);
+   }
+}
+
+
