@@ -1,11 +1,26 @@
 import express, { Request, Response } from 'express';
+import { rateLimit } from 'express-rate-limit'
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 
+const liniter_generate_otp = rateLimit({
+   windowMs: 1 * 60 * 1000, // 1 minute
+   max: 3, // Limit each IP to 3 requests per windowMs
+   message: "Too many requests, please try again after a 60s.",
+   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
 
+const Limiter_reset_password = rateLimit({
+   windowMs: 1 * 60 * 1000, // 1 minute
+   max: 5, // Limit each IP to 5 requests per windowMs
+   message: "Too many requests, please try again after a 60s.",
+   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
 const otpStore: Record<string, string> = {};
 
 app.get('/see-otp',(req:Request,res:Response) => {
@@ -13,7 +28,7 @@ app.get('/see-otp',(req:Request,res:Response) => {
 })
 
 
-app.post('/generate-otp', (req, res):any => {
+app.post('/generate-otp',liniter_generate_otp, (req, res):any => {
   const email = req.body.email;
   if (!email) {
     return res.status(400).json({ message: "Email is required" });
@@ -26,7 +41,7 @@ app.post('/generate-otp', (req, res):any => {
 });
 
 
-app.post('/reset-password', (req, res):any => {
+app.post('/reset-password',Limiter_reset_password, (req, res):any => {
   const { email, otp, newPassword } = req.body;
   if (!email || !otp || !newPassword) {
     return res.status(400).json({ message: "Email, OTP, and new password are required" });
