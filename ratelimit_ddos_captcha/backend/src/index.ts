@@ -1,10 +1,12 @@
 import express, { Request, Response } from 'express';
 import { rateLimit } from 'express-rate-limit'
+import cors from 'cors'
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.use(cors())
 
 const liniter_generate_otp = rateLimit({
    windowMs: 1 * 60 * 1000, // 1 minute
@@ -41,17 +43,27 @@ app.post('/generate-otp',liniter_generate_otp, (req, res):any => {
 });
 
 
-app.post('/reset-password',Limiter_reset_password, (req, res):any => {
-  const { email, otp, newPassword } = req.body;
+app.post('/reset-password',Limiter_reset_password, async (req:any, res:any) => {
+  const { email, otp, newPassword,token } = req.body;
   if (!email || !otp || !newPassword) {
     return res.status(400).json({ message: "Email, OTP, and new password are required" });
   }
-  if (otpStore[email] === otp) {
+  let formData = new FormData();
+  formData.append("secret", '0x4AAAAAABDy0bIbwq1pUSwWcBSgpoCVMZQ');
+  formData.append("response", token);
+
+
+  const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+  const result = await fetch(url, {
+    body: formData,
+    method: "POST",
+  });
+  if (result && otpStore[email] === otp) {
     console.log(`Password for ${email} has been reset to: ${newPassword}`);
     delete otpStore[email];
     res.status(200).json({ message: "Password has been reset successfully" });
   } else {
-    res.status(401).json({ message: "Invalid OTP" });
+    res.status(401).json({ message: "Invalid OTP or token " });
   }
 });
 
