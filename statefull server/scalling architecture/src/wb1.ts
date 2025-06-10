@@ -8,7 +8,14 @@ const client= createClient({
 
 client.connect()
 
-
+client.subscribe("channel",(message)=>{
+   console.log("Received message from redis",message)
+   wss.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+         client.send(message);
+      }
+   });
+})
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
