@@ -11,11 +11,15 @@ wss.on("connection", (ws) => {
 
     if (message.type === "sender") {
       senderSocket = ws;
+      console.log("Sender connected");
     } else if (message.type === "receiver") {
       receiverSocket = ws;
+      console.log("Receiver connected");
     } else if (message.type === "createOffer") {
+      console.log("Creating offer for receiver");
       receiverSocket?.send(JSON.stringify({ type: "createOffer", sdp: message.sdp }));
     } else if (message.type === "createAnswer") {
+      console.log("Creating answer for sender");
       senderSocket?.send(JSON.stringify({ type: "createAnswer", sdp: message.sdp }));
     } else if (message.type === "iceCandidate") {
       if (ws === senderSocket) {
