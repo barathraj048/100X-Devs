@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export const Receiver = () => {
+    const vdoRef = useRef<HTMLVideoElement>(null);
+
     useEffect(() => {
         const socket = new WebSocket('ws://localhost:8080');
 
@@ -8,22 +10,14 @@ export const Receiver = () => {
             socket.send(JSON.stringify({ type: 'receiver' }));
         };
 
-        startReceiving(socket);
-    }, []);
-
-    function startReceiving(socket: WebSocket) {
-        const video = document.createElement('video');
-        video.autoplay = true;
-        video.playsInline = true;
-        document.body.appendChild(video);
-
         const pc = new RTCPeerConnection();
 
-        const mediaStream = new MediaStream();
-        video.srcObject = mediaStream;
-
         pc.ontrack = (event) => {
-            mediaStream.addTrack(event.track);
+            if (vdoRef.current) {
+                vdoRef.current.srcObject = event.streams[0];
+                console.log("Setting stream to video", event.streams[0]);
+
+            }
         };
 
         pc.onicecandidate = (event) => {
@@ -51,7 +45,13 @@ export const Receiver = () => {
                 await pc.addIceCandidate(message.candidate);
             }
         };
-    }
+    }, []);
 
-    return <div>Receiver Ready</div>;
+    
+
+    return (
+        <div>
+            <video ref={vdoRef} autoPlay playsInline muted />
+        </div>
+    );
 };
