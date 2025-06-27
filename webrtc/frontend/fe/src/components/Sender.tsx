@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export const Sender = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
+    const VdoRef = useRef<HTMLVideoElement>(null);
+    const pcRef = useRef<RTCPeerConnection | null>(null);
 
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:8080');
@@ -9,6 +11,16 @@ export const Sender = () => {
             ws.send(JSON.stringify({ type: 'sender' }));
         };
         setSocket(ws);
+
+        ws.onmessage = async (event) => {
+            const message = JSON.parse(event.data);
+
+            if (message.type === 'createAnswer') {
+                await pcRef.current?.setRemoteDescription(message.sdp);
+            } else if (message.type === 'iceCandidate') {
+                await pcRef.current?.addIceCandidate(message.candidate);
+            }
+        };
     }, []);
 
     const initiateConn = async () => {
@@ -18,14 +30,12 @@ export const Sender = () => {
         }
 
         const pc = new RTCPeerConnection();
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        pcRef.current = pc;
 
-        // Attach local preview
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.autoplay = true;
-        video.playsInline = true;
-        document.body.appendChild(video);
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (VdoRef.current) {
+            VdoRef.current.srcObject = stream;
+        }
 
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
@@ -38,19 +48,10 @@ export const Sender = () => {
             }
         };
 
-        socket.onmessage = async (event) => {
-            const message = JSON.parse(event.data);
-
-            if (message.type === 'createAnswer') {
-                await pc.setRemoteDescription(message.sdp);
-            } else if (message.type === 'iceCandidate') {
-                await pc.addIceCandidate(message.candidate);
-            }
-        };
-
         pc.onnegotiationneeded = async () => {
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
+
             socket.send(JSON.stringify({
                 type: 'createOffer',
                 sdp: offer
@@ -58,8 +59,16 @@ export const Sender = () => {
         };
     };
 
-    return <div>
-        Sender
-        <button onClick={initiateConn}>Send Video</button>
-    </div>;
+    return (
+        <div>
+            <h3>Sender</h3>
+            <button onClick={initiateConn}>Send Video</button>
+            <video
+                ref={VdoRef}
+                muted
+                autoPlay
+                playsInline
+            />
+        </div>
+    );
 };
