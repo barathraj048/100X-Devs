@@ -1,16 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const Receiver = () => {
+    const [socket, setSocket] = useState<WebSocket | null>(null);
     const vdoRef = useRef<HTMLVideoElement>(null);
+    const pcRef = useRef<RTCPeerConnection | null>(null)
 
     useEffect(() => {
         const socket = new WebSocket('ws://localhost:8080');
-
-        socket.onopen = () => {
-            socket.send(JSON.stringify({ type: 'receiver' }));
-        };
+        setSocket(socket);
 
         const pc = new RTCPeerConnection();
+        pcRef.current = pc;
 
         pc.ontrack = (event) => {
             if (vdoRef.current) {
@@ -28,6 +28,16 @@ export const Receiver = () => {
                 }));
             }
         };
+
+        pc.onnegotiationneeded=async()=> {
+            const offer= await pc.createOffer()
+            await pc.setLocalDescription(offer);
+
+            socket.send(JSON.stringify({
+                type: "createOffer",
+                sdp: offer
+            }))
+        }
 
         socket.onmessage = async (event) => {
             const message = JSON.parse(event.data);
