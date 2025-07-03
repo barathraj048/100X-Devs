@@ -1,27 +1,33 @@
-import { WebSocketServer ,WebSocket } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 
 const wss = new WebSocketServer({ port: 8080 });
 
-let peer:WebSocket[]=[]
+// Only support 2 peers at a time
+let peers: WebSocket[] = [];
 
 wss.on("connection", (ws) => {
-  peer.push(ws);
+  if (peers.length >= 2) {
+    ws.send(JSON.stringify({ type: "error", message: "Room full" }));
+    ws.close();
+    return;
+  }
+
+  peers.push(ws);
+  console.log("New peer connected");
+
   ws.on("message", (msg) => {
+    const data = JSON.parse(msg.toString());
 
-    const message = JSON.parse(msg.toString());
-
-    let target= peer.filter(p => p !==ws)
-    if(target.length==0) return ;
-    if(["createOffer", "createAnswer", "iceCandidate"].includes(message.type)) {
-      target.forEach((p)=> {
-        p.send(JSON.stringify(message))
-      })
-    } 
+    const other = peers.find((p) => p !== ws);
+    if (other && other.readyState === WebSocket.OPEN) {
+      other.send(JSON.stringify(data));
+    }
   });
 
   ws.on("close", () => {
-    peer = peer.filter(p => p !== ws);
+    peers = peers.filter((p) => p !== ws);
+    console.log("Peer disconnected");
   });
 });
 
-console.log("WebSocket signaling server running on ws://localhost:8080");
+console.log("Signaling server running at ws://localhost:8080");

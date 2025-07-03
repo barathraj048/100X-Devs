@@ -1,67 +1,98 @@
 import { useEffect, useRef, useState } from "react";
 
-export const Receiver = () => {
-    const [socket, setSocket] = useState<WebSocket | null>(null);
-    const vdoRef = useRef<HTMLVideoElement>(null);
-    const pcRef = useRef<RTCPeerConnection | null>(null)
+const Peer = () => {
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const pcRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
 
-    useEffect(() => {
-        const socket = new WebSocket('ws://localhost:8080');
-        setSocket(socket);
+  useEffect(() => {
+    const socket = new WebSocket('ws://localhost:8080');
+    setSocket(socket);
 
-        const pc = new RTCPeerConnection();
-        pcRef.current = pc;
+    const pc = new RTCPeerConnection();
+    pcRef.current = pc;
 
-        pc.ontrack = (event) => {
-            if (vdoRef.current) {
-                vdoRef.current.srcObject = event.streams[0];
-                console.log("Setting stream to video", event.streams[0]);
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        localStreamRef.current = stream;
 
-            }
-        };
-
-        pc.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.send(JSON.stringify({
-                    type: 'iceCandidate',
-                    candidate: event.candidate
-                }));
-            }
-        };
-
-        pc.onnegotiationneeded=async()=> {
-            const offer= await pc.createOffer()
-            await pc.setLocalDescription(offer);
-
-            socket.send(JSON.stringify({
-                type: "createOffer",
-                sdp: offer
-            }))
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
         }
 
-        socket.onmessage = async (event) => {
-            const message = JSON.parse(event.data);
+        stream.getTracks().forEach(track => {
+          pc.addTrack(track, stream);
+        });
+      })
+      .catch(err => {
+        console.error("Failed to get local stream", err);
+      });
 
-            if (message.type === 'createOffer') {
-                await pc.setRemoteDescription(message.sdp);
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
+    pc.ontrack = (event) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+        console.log("Remote stream set", event.streams[0]);
+      }
+    };
 
-                socket.send(JSON.stringify({
-                    type: 'createAnswer',
-                    sdp: answer
-                }));
-            } else if (message.type === 'iceCandidate') {
-                await pc.addIceCandidate(message.candidate);
-            }
-        };
-    }, []);
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.send(JSON.stringify({
+          type: 'iceCandidate',
+          candidate: event.candidate
+        }));
+      }
+    };
 
-    
+    socket.onmessage = async (event) => {
+      const message = JSON.parse(event.data);
 
-    return (
-        <div>
-            <video ref={vdoRef} autoPlay playsInline muted />
-        </div>
-    );
+      if (message.type === 'createOffer') {
+        await pc.setRemoteDescription(new RTCSessionDescription(message.sdp));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        socket.send(JSON.stringify({
+          type: 'createAnswer',
+          sdp: answer
+        }));
+      } else if (message.type === 'createAnswer') {
+        await pc.setRemoteDescription(new RTCSessionDescription(message.sdp));
+      } else if (message.type === 'iceCandidate') {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(message.candidate));
+        } catch (err) {
+          console.error("Error adding ICE", err);
+        }
+      }
+    };
+
+    pc.onnegotiationneeded = async () => {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      socket.send(JSON.stringify({
+        type: 'createOffer',
+        sdp: offer
+      }));
+    };
+
+    return () => {
+      socket.close();
+      pc.close();
+    };
+  }, []);
+
+  return (
+    <div>
+      <h2>Local Stream</h2>
+      <video ref={localVideoRef} autoPlay playsInline muted />
+      <h2>Remote Stream</h2>
+      <video ref={remoteVideoRef} autoPlay playsInline muted/>
+    </div>
+  );
 };
+
+export default Peer;

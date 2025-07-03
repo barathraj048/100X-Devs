@@ -1,7 +1,7 @@
 import './App.css'
 import { Route, BrowserRouter, Routes } from 'react-router-dom'
 import { Sender } from './components/Sender'
-import { Receiver } from './components/Reciver'
+import  Receiver  from './components/Reciver'
 
 function App() {
   return (
