@@ -39,10 +39,15 @@ export const Sender = () => {
       return;
     }
 
-    const pc = new RTCPeerConnection();
+    const pc = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
     pcRef.current = pc;
 
-    // ✅ Receive remote stream and render it
+    pc.oniceconnectionstatechange = () => {
+      console.log("ICE Connection State (Sender):", pc.iceConnectionState);
+    };
+
     pc.ontrack = (event) => {
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];

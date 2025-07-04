@@ -2,7 +2,6 @@ import { WebSocketServer, WebSocket } from "ws";
 
 const wss = new WebSocketServer({ port: 8080 });
 
-// Only support 2 peers at a time
 let peers: WebSocket[] = [];
 
 wss.on("connection", (ws) => {

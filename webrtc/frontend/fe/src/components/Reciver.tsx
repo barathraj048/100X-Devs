@@ -11,17 +11,21 @@ const Peer = () => {
     const socket = new WebSocket('ws://localhost:8080');
     setSocket(socket);
 
-    const pc = new RTCPeerConnection();
+    const pc = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
     pcRef.current = pc;
+
+    pc.oniceconnectionstatechange = () => {
+      console.log("ICE Connection State (Receiver):", pc.iceConnectionState);
+    };
 
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then((stream) => {
         localStreamRef.current = stream;
-
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
         }
-
         stream.getTracks().forEach(track => {
           pc.addTrack(track, stream);
         });
@@ -69,16 +73,6 @@ const Peer = () => {
       }
     };
 
-    pc.onnegotiationneeded = async () => {
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      socket.send(JSON.stringify({
-        type: 'createOffer',
-        sdp: offer
-      }));
-    };
-
     return () => {
       socket.close();
       pc.close();
@@ -90,7 +84,7 @@ const Peer = () => {
       <h2>Local Stream</h2>
       <video ref={localVideoRef} autoPlay playsInline muted />
       <h2>Remote Stream</h2>
-      <video ref={remoteVideoRef} autoPlay playsInline muted/>
+      <video ref={remoteVideoRef} autoPlay playsInline />
     </div>
   );
 };
