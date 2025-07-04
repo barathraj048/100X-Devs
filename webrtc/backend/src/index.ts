@@ -12,11 +12,10 @@ wss.on("connection", (ws) => {
   }
 
   peers.push(ws);
-  console.log("New peer connected");
+  console.log("🔗 Peer connected");
 
   ws.on("message", (msg) => {
     const data = JSON.parse(msg.toString());
-
     const other = peers.find((p) => p !== ws);
     if (other && other.readyState === WebSocket.OPEN) {
       other.send(JSON.stringify(data));
@@ -25,8 +24,8 @@ wss.on("connection", (ws) => {
 
   ws.on("close", () => {
     peers = peers.filter((p) => p !== ws);
-    console.log("Peer disconnected");
+    console.log("❌ Peer disconnected");
   });
 });
 
-console.log("Signaling server running at ws://localhost:8080");
+console.log("🚀 Signaling server running at ws://localhost:8080");
