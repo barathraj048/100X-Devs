@@ -11,15 +11,15 @@ const Peer = () => {
     const ws = new WebSocket("ws://localhost:8080");
 
     ws.onopen = () => {
-      console.log("✅ WebSocket connected (receiver)");
+      console.log(" WebSocket connected (receiver)");
     };
 
     ws.onerror = (err) => {
-      console.error("❌ WebSocket error (receiver):", err);
+      console.error("WebSocket error (receiver):", err);
     };
 
     ws.onclose = () => {
-      console.log("🔒 WebSocket closed (receiver)");
+      console.log("WebSocket closed (receiver)");
     };
 
     setSocket(ws);
@@ -31,21 +31,21 @@ const Peer = () => {
     // ICE candidate gathering
     pc.onicecandidate = (e) => {
       if (e.candidate) {
-        console.log("📤 Sending ICE candidate (receiver)");
+        console.log("Sending ICE candidate (receiver)");
         ws.send(JSON.stringify({ type: "iceCandidate", candidate: e.candidate }));
       } else {
-        console.log("🧊 ICE gathering complete (receiver)");
+        console.log("ICE gathering complete (receiver)");
       }
     };
 
     // ICE state updates
     pc.oniceconnectionstatechange = () => {
-      console.log("🌐 ICE connection state (receiver):", pc.iceConnectionState);
+      console.log("ICE connection state (receiver):", pc.iceConnectionState);
     };
 
     // Handle remote track
     pc.ontrack = (event) => {
-      console.log("📺 Remote track received (receiver)");
+      console.log("Remote track received (receiver)");
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
       }
@@ -54,28 +54,27 @@ const Peer = () => {
     // Handle incoming WebSocket messages
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
-      console.log("📩 Received message:", data);
+      console.log(" Received message:", data);
 
       if (data.type === "offer") {
-        console.log("📥 Received offer (receiver)");
+        console.log("Received offer (receiver)");
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         ws.send(JSON.stringify({ type: "answer", sdp: answer }));
-        console.log("✅ Sent answer (receiver)");
+        console.log("Sent answer (receiver)");
       } else if (data.type === "answer") {
-        console.log("📥 Received unexpected answer on receiver side");
+        console.log(" Received unexpected answer on receiver side");
       } else if (data.type === "iceCandidate") {
         try {
-          console.log("📥 Adding ICE candidate (receiver)");
+          console.log(" Adding ICE candidate (receiver)");
           await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
         } catch (err) {
-          console.error("❌ Error adding ICE candidate (receiver)", err);
+          console.error(" Error adding ICE candidate (receiver)", err);
         }
       }
     };
 
-    // Get local stream
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
       console.log("🎥 Got local media (receiver)");
       stream.getTracks().forEach((track) => {
@@ -85,15 +84,8 @@ const Peer = () => {
         localVideoRef.current.srcObject = stream;
       }
     }).catch((err) => {
-      console.error("❌ Failed to get local media (receiver):", err);
+      console.error(" Failed to get local media (receiver):", err);
     });
-
-    // Cleanup on unmount
-    return () => {
-      console.log("🧹 Cleaning up receiver...");
-      ws.close();
-      pc.close();
-    };
   }, []);
 
   return (

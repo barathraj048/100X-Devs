@@ -5,27 +5,27 @@ export const Sender = () => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
-  const makingOffer = useRef(false); // To prevent glare
+  const makingOffer = useRef(false);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");
 
     ws.onopen = () => {
-      console.log("✅ WebSocket connected");
+      console.log("WebSocket connected");
     };
 
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === "answer") {
-        console.log("📥 Setting remote description (answer)...");
+        console.log(" Setting remote description (answer)...");
         await pcRef.current?.setRemoteDescription(new RTCSessionDescription(data.sdp));
       } else if (data.type === "iceCandidate") {
         try {
-          console.log("📥 Adding ICE candidate (sender)...");
+          console.log(" Adding ICE candidate (sender)...");
           await pcRef.current?.addIceCandidate(new RTCIceCandidate(data.candidate));
         } catch (err) {
-          console.error("❌ Error adding ICE candidate", err);
+          console.error(" Error adding ICE candidate", err);
         }
       }
     };
@@ -43,10 +43,10 @@ export const Sender = () => {
         makingOffer.current = true;
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
-        console.log("📤 Sending offer from onnegotiationneeded");
+        console.log(" Sending offer from onnegotiationneeded");
         ws.send(JSON.stringify({ type: "offer", sdp: offer }));
       } catch (err) {
-        console.error("❌ Failed during negotiation:", err);
+        console.error(" Failed during negotiation:", err);
       } finally {
         makingOffer.current = false;
       }
@@ -54,15 +54,15 @@ export const Sender = () => {
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("📤 Sending ICE candidate");
+        console.log(" Sending ICE candidate");
         ws.send(JSON.stringify({ type: "iceCandidate", candidate: event.candidate }));
       } else {
-        console.log("🧊 ICE candidate gathering done");
+        console.log(" ICE candidate gathering done");
       }
     };
 
     pc.oniceconnectionstatechange = () => {
-      console.log("🌐 ICE connection state:", pc.iceConnectionState);
+      console.log(" ICE connection state:", pc.iceConnectionState);
     };
 
     pc.ontrack = (event) => {
@@ -78,12 +78,6 @@ export const Sender = () => {
         localVideoRef.current.srcObject = stream;
       }
     });
-
-    return () => {
-      console.log("🧹 Cleanup");
-      ws.close();
-      pc.close();
-    };
   }, []);
 
   return (
