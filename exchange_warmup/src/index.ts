@@ -9,7 +9,6 @@ const app = express();
 app.use(express.json());
 
 let GLOBAL_TRADE_ID = 0;
-
 app.post('/api/v1/order', (req, res) => {
   const order = OrderInputSchema.safeParse(req.body);
   if (!order.success) {
