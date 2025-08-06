@@ -5,7 +5,9 @@ import OrderBook from "./OrderBook"
 function Details() {
   return (
     <div>
-      <Info/>
+      <hr className="border-t border-gray-700"/>
+      <div className="my-2 mx-2"><Info/></div>
+      <hr className="border-t border-gray-700"/>
       <Graph/>
       <OrderBook/>
     </div>
