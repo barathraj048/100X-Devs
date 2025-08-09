@@ -1,11 +1,12 @@
 import React from 'react'
+import image from '../../public/file.svg'
 
 function Info() {
   return (
     <div className='gap-6 flex py-2'>
       <div className='flex relative items-center justify-center'>
-        <img src="" alt="" width={32} height={32} className='rounded-full absolute left-4 bg-white '/>
-        <img src="" alt="" width={32} height={32} className='rounded-full bg-white'/>
+        <img src={`${image}`} alt="" width={32} height={32} className='rounded-full absolute left-4 bg-white '/>
+        <img src={`${image}`} alt="" width={32} height={32} className='rounded-full bg-white'/>
       </div>
       <div className='flex justify-between items-center gap-6'>
         <div className='text-sm font-semibold'>BTC/USDT</div>
