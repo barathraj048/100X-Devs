@@ -9,7 +9,7 @@ import {
 export class ChartManager {
   private candleSeries: ISeriesApi<"Candlestick">;
   private lastUpdateTime: number = 0;
-  private chart: any;
+  private chart: import("lightweight-charts").IChartApi;
   private currentBar: {
     open: number | null;
     high: number | null;

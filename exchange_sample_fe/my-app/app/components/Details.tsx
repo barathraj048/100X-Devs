@@ -15,7 +15,7 @@ function Details() {
 
       <div className="grid grid-cols-4 gap-4 my-2 mx-2">
         <div className="col-span-3">
-          <Graph />
+          <Graph market=""/>
         </div>
         <div className="col-span-1 border-x border-gray-700 px-4">
           <OrderBook />
