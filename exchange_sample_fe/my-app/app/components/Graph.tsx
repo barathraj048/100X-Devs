@@ -16,7 +16,7 @@ export default function Graph({
     let klineData: KLine[] = [];
     try {
       klineData = await getKlines(market, "1h", Math.floor((new Date().getTime() - 1000 * 60 * 60 * 24 * 7) / 1000), Math.floor(new Date().getTime() / 1000)); 
-
+      console.log(klineData +":kline data");
     } catch (e) { }
 
     if (chartRef) {

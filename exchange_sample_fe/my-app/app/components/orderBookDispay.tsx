@@ -37,7 +37,7 @@ function OrderBookDispay({ bits, currentPrice, asks }: OrderBookDisplayProps) {
           </div>
         );
       })}
-      <div className="text-lg my-2 flex gap-4 ">{currentPrice} <div className="text-sm items-center">currentprice</div></div>
+      <div className="text-lg my-2 flex gap-4 ">{currentPrice} <div className="text-sm items-center"></div></div>
 
       {asks.map((ask, index) => {
         const cumulativePercent =  ((ask[2] / totalAsks) * 100)

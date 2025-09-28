@@ -92,7 +92,7 @@ app.get('/api/price', (req, res) => {
 });
 
 app.get('/api/trades', (req, res) => {
-  res.json(generateTrades(102)); // objects
+  res.json(generateTrades(103)); // objects
 });
 
 // v1 endpoints used by frontend
