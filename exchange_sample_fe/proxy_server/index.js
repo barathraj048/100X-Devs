@@ -37,24 +37,15 @@ const generateOrderBook = (basePrice = 100, withCumulative = false) => {
   return { bids, asks };
 };
 
-const generateTrades = (basePrice = 100, asArray = false) => {
+const generateTrades = (basePrice = 100) => {
   const trades = [];
   for (let i = 0; i < 10; i++) {
-    if (asArray) {
-      trades.push([
-        Date.now() - i * 60000,                // timestamp
-        randomFloat(basePrice - 1, basePrice + 1), // price
-        randomFloat(0.1, 3),                   // qty
-        Math.random() > 0.5 ? 'buy' : 'sell'   // side
-      ]);
-    } else {
-      trades.push({
-        price: randomFloat(basePrice - 1, basePrice + 1),
-        qty: randomFloat(0.1, 3),
-        side: Math.random() > 0.5 ? 'buy' : 'sell',
-        timestamp: Date.now() - i * 60000,
-      });
-    }
+    trades.push({
+      price: randomFloat(basePrice - 1, basePrice + 1),
+      qty: randomFloat(0.1, 3),
+      side: Math.random() > 0.5 ? 'buy' : 'sell',
+      timestamp: Date.now() - i * 60000,
+    });
   }
   return trades;
 };
@@ -69,61 +60,23 @@ const generateKlines = (basePrice = 100) => {
     const low = Math.min(open, close) - randomFloat(0, 0.5);
     const volume = randomFloat(1, 20);
 
-    klines.push([
-      now - i * 60000, // start
-      open,
-      high,
-      low,
-      close,
-      volume,
-      now - (i - 1) * 60000 // end
-    ]);
+    klines.push({
+      open: open.toString(),
+      high: high.toString(),
+      low: low.toString(),
+      close: close.toString(),
+      start: now - i * 60000,
+      end: now - (i - 1) * 60000,
+      volume: volume.toString(),
+    });
   }
   return klines.reverse();
 };
 
-app.get('/api/orderbook', (req, res) => {
-  const basePrice = randomFloat(102, 104);
-  res.json(generateOrderBook(basePrice, true));
-});
+// ---------- frontend matching endpoints ----------
 
-app.get('/api/price', (req, res) => {
-  res.json({ price: randomFloat(102, 104), timestamp: Date.now() });
-});
-
-app.get('/api/trades', (req, res) => {
-  res.json(generateTrades(103)); // objects
-});
-
-// v1 endpoints used by frontend
-app.get('/api/v1/depth', (req, res) => {
-  const basePrice = randomFloat(102, 104);
-  res.json(generateOrderBook(basePrice));
-});
-
-app.get('/api/v1/trades', (req, res) => {
-  res.json(generateTrades(103, false)); // objects, not arrays
-});
-
-app.get('/api/v1/klines', (req, res) => {
-  const raw = generateKlines(103);
-  const mapped = raw.map(([start, open, high, low, close, volume, end]) => ({
-    open: open.toString(),
-    high: high.toString(),
-    low: low.toString(),
-    close: close.toString(),
-    start,
-    end,
-    volume: volume.toString(),
-  }));
-  res.json(mapped);
-});
-
-app.get('/api/v1/markets', (req, res) => {
-  res.json(['BTCUSDT', 'ETHUSDT', 'DOGEUSDT']);
-});
-
-app.get('/api/v1/tickers', (req, res) => {
+// GET /tickers
+app.get('/tickers', (req, res) => {
   res.json([
     { symbol: 'BTCUSDT', price: randomFloat(102, 104) },
     { symbol: 'ETHUSDT', price: randomFloat(1500, 1600) },
@@ -131,7 +84,23 @@ app.get('/api/v1/tickers', (req, res) => {
   ]);
 });
 
-const port = 3001;
+// GET /depth?symbol=BTCUSDT
+app.get('/depth', (req, res) => {
+  const basePrice = randomFloat(102, 104);
+  res.json(generateOrderBook(basePrice));
+});
+
+// GET /trades?symbol=BTCUSDT
+app.get('/trades', (req, res) => {
+  res.json(generateTrades(103));
+});
+
+// GET /klines?symbol=BTCUSDT&interval=1m&startTime=...&endTime=...
+app.get('/klines', (req, res) => {
+  res.json(generateKlines(103));
+});
+
+const port = 3000; // ✅ match frontend BASE_URL
 app.listen(port, () =>
-  console.log(`✅ Dummy exchange running at http://localhost:${port}`)
+  console.log(`✅ Backend aligned with frontend at http://localhost:${port}`)
 );

@@ -39,7 +39,6 @@ export default function Graph({
           color: "white",
         }
       );
-      //@ts-ignore
       chartManagerRef.current = chartManager;
     }
   };
