@@ -12,7 +12,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/redis": "^4.0.10",
     "@types/ws": "^8.18.1",
+    "redis": "^5.10.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
