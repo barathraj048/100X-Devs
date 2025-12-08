@@ -1,7 +1,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import {createClient} from 'redis';
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8081});
 
 const publishClient=createClient();
 await publishClient.connect();
@@ -48,10 +48,10 @@ wss.on('connection', function connection(ws) {
            user.rooms.push(msg.room);
            console.log(`User ${userID} subscribed to room ${msg.room}`);
 
-           if(userSubscribed(msg.room)){
-               subscribeClient.subscribe(msg.room,(message)=> {
+           if(!userSubscribed(msg.room)){
+               subscribeClient.subscribe(msg.room,(message,room)=> {
                   users.forEach((val)=> {
-                     if(val.rooms.includes(msg.room)){
+                     if(val.rooms.includes(room)){
                         val.ws.send(message);
                      }
                   })
@@ -64,7 +64,7 @@ wss.on('connection', function connection(ws) {
             user.rooms=user.rooms.filter(r => r!==msg.room);
             console.log(`User ${userID} unsubscribed from room ${msg.room}`);
 
-            if(!userSubscribed(msg.rooms)){
+            if(!userSubscribed(msg.room)){
                subscribeClient.unsubscribe(msg.room)
             }
          }
