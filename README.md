@@ -17,7 +17,7 @@ This system enables real-time **code execution & problem-solving**, where users 
   {
     "problem_id": 1,
     "code": "your_solution_here",
-    "language": "java"
+    "language": "javascript"
   }
   ```
 - Sends the request to the **Primary Backend**.
