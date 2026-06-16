@@ -8,8 +8,9 @@ const getLocalStorage = (key: string) => {
 };
 
 const useLocalStorage = (key: string, initialValue: any) => {
-  const [value, setValue] = useState(
-    () => getLocalStorage(key) || initialValue
+  const [value, setValue] = useState( () => 
+   {
+      return getLocalStorage(key) || initialValue}
   );
 
   useEffect(() => {
